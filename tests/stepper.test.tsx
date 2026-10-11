@@ -29,12 +29,12 @@ describe("process stepper", () => {
     expect(title()).toHaveTextContent(allSteps.find((s) => s.id === "1.3")!.title);
   });
 
-  it("side arrows move to the previous and next screen", () => {
+  it("previous and next buttons in the player move between screens", () => {
     render(<App />);
-    expect(screen.getByRole("button", { name: "המסך הקודם" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: "המסך הבא" }));
+    expect(screen.getByRole("button", { name: "הקודם" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "הבא" }));
     expect(title()).toHaveTextContent(allSteps[1].title);
-    fireEvent.click(screen.getByRole("button", { name: "המסך הקודם" }));
+    fireEvent.click(screen.getByRole("button", { name: "הקודם" }));
     expect(title()).toHaveTextContent(allSteps[0].title);
   });
 });

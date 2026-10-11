@@ -4,6 +4,7 @@ import { TALK_FRAMES, avatarVideoUrl, hasStepVideo } from "../lib/media";
 import { narrate as startNarration, type NarrationControl } from "../lib/narration";
 import { stopSpeaking } from "../lib/speech";
 import { wordAtProgress } from "../lib/words";
+import { useLang, useT } from "../lib/i18n";
 
 interface Props {
   step: Step;
@@ -21,6 +22,8 @@ interface Props {
   paused?: boolean;
   /** Playback position 0..1 for the player progress bar. */
   onProgress?: (fraction: number) => void;
+  /** Playback speed of the video / narration. */
+  rate?: number;
 }
 
 // Playback order: the module opening video (first step of a module) → the step's own
@@ -35,15 +38,20 @@ function mouthFor(level: number): "0" | "1" | "2" {
 // Floating 3D presenter card that sits on the screenshot. While narrating, the voice
 // level swaps between closed/half/open mouth frames (lip movement) and drives a glow.
 // Remount (via `key`) to restart playback for a step.
-export default function AvatarPanel({ step, introUrl, introText, onIntro, narrate, onWord, onFinished, paused = false, onProgress }: Props) {
+export default function AvatarPanel({ step, introUrl: introVideo, introText, onIntro, narrate, onWord, onFinished, paused = false, onProgress, rate = 1 }: Props) {
+  const lang = useLang();
+  const t = useT();
+  // The recorded videos speak Hebrew: in English the presenter narrates with the English voice.
+  const introUrl = lang === "he" ? introVideo : undefined;
   // Only request videos that exist: a missing one would load the SPA page instead.
-  const afterIntro: Phase = hasStepVideo(step.id) ? "step-video" : "narration";
+  const afterIntro: Phase = lang === "he" && hasStepVideo(step.id) ? "step-video" : "narration";
   const [phase, setPhase] = useState<Phase>(() => (introUrl ? "intro-video" : afterIntro));
   const [videoReady, setVideoReady] = useState(false);
   const [speaking, setSpeaking] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlRef = useRef<NarrationControl | null>(null);
+  const rateRef = useRef(rate);
   const handlersRef = useRef({ onWord, onFinished, onProgress, onIntro });
   handlersRef.current = { onWord, onFinished, onProgress, onIntro };
 
@@ -75,13 +83,20 @@ export default function AvatarPanel({ step, introUrl, introText, onIntro, narrat
         el.style.setProperty("--lvl", v.toFixed(3));
         el.dataset.mouth = mouthFor(v);
       },
-    });
+    }, { lang, rate: rateRef.current });
     controlRef.current = ctl;
     return () => {
       controlRef.current = null;
       ctl();
     };
-  }, [phase, narrate, step.id, step.script]);
+  }, [phase, narrate, step.id, step.script, lang]);
+
+  // Playback speed for whichever is playing.
+  useEffect(() => {
+    rateRef.current = rate;
+    if (videoRef.current) videoRef.current.playbackRate = rate;
+    controlRef.current?.setRate?.(rate);
+  }, [rate, videoReady]);
 
   // Player pause / resume for whichever is playing (video or narration).
   useEffect(() => {
@@ -97,10 +112,10 @@ export default function AvatarPanel({ step, introUrl, introText, onIntro, narrat
 
   useEffect(() => () => stopSpeaking(), []);
 
-  const status = paused ? "⏸ מושהה" : videoReady ? "▶ מציג סרטון" : speaking ? "🔊 מסביר…" : narrate ? "מוכן" : "🔇 קריינות כבויה";
+  const status = paused ? t("statusPaused") : videoReady ? t("statusVideo") : speaking ? t("statusSpeaking") : narrate ? t("statusReady") : t("statusMuted");
 
   return (
-    <aside aria-label="אוהד מנקין, המדריך" className="avatar-stage">
+    <aside aria-label={`${t("presenter")}, ${t("presenterRole")}`} className="avatar-stage">
       <div ref={cardRef} data-mouth="0" className={`avatar-3d ${speaking ? "is-speaking" : ""}`}>
         {videoSrc && (
           <video
@@ -110,7 +125,7 @@ export default function AvatarPanel({ step, introUrl, introText, onIntro, narrat
             autoPlay
             playsInline
             preload="auto"
-            aria-label={phase === "intro-video" ? "סרטון פתיחה של הנושא" : `סרטון הסבר: ${step.title}`}
+            aria-label={phase === "intro-video" ? t("introVideo") : `${t("stepVideo")}: ${step.title}`}
             className={videoReady ? "avatar-media" : "hidden"}
             onLoadedData={() => setVideoReady(true)}
             onCanPlay={() => setVideoReady(true)}
@@ -137,7 +152,7 @@ export default function AvatarPanel({ step, introUrl, introText, onIntro, narrat
           <div className="avatar-face">
             {TALK_FRAMES.map((src, i) =>
               i === 0 ? (
-                <img key={src} src={src} alt="אוהד מנקין, EPR מערכות" data-speaking={speaking ? "true" : "false"} className="avatar-frame" />
+                <img key={src} src={src} alt={`${t("presenter")}, EPR`} data-speaking={speaking ? "true" : "false"} className="avatar-frame" />
               ) : (
                 <img key={src} src={src} alt="" aria-hidden="true" className={`avatar-frame mouth-${i}`} />
               ),
@@ -145,7 +160,7 @@ export default function AvatarPanel({ step, introUrl, introText, onIntro, narrat
           </div>
         )}
         <div className="avatar-tag">
-          <span className="font-bold">אוהד מנקין</span>
+          <span className="font-bold">{t("presenter")}</span>
           <span className="text-[0.7em] opacity-90">{status}</span>
         </div>
       </div>

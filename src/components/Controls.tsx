@@ -1,3 +1,6 @@
+import { useT } from "../lib/i18n";
+import UiIcon from "./Icon";
+
 interface Props {
   isFirst: boolean;
   isLast: boolean;
@@ -13,25 +16,32 @@ interface Props {
   onTogglePause: () => void;
   /** Playback position of the current step, 0..1. */
   progress: number;
+  /** Playback speed of the video / narration. */
+  rate: number;
+  onRate: (rate: number) => void;
+  captions: boolean;
+  onToggleCaptions: () => void;
 }
 
-// Media-player style bar (RTL): previous on the right, a big play/pause in the middle,
-// next on the left; replay / narration / auto-advance as secondary icon buttons.
+export const RATES = [0.75, 1, 1.25, 1.5];
+
+// Media-player bar: previous / big play-pause / next in the middle; replay, sound, speed and
+// captions on one side, auto-advance on the other. Arrows follow the reading direction
+// (in Hebrew "previous" points right).
 const Icon = {
-  // In RTL "previous" points right and "next" points left.
   prev: (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
-      <path d="M6 5h2v14H6zM9.5 12 18 5v14z" transform="matrix(-1 0 0 1 24 0)" />
-    </svg>
-  ),
-  next: (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="h-5 w-5 rtl:-scale-x-100" fill="currentColor" aria-hidden="true">
       <path d="M6 5h2v14H6zM9.5 12 18 5v14z" />
     </svg>
   ),
+  next: (
+    <svg viewBox="0 0 24 24" className="h-5 w-5 rtl:-scale-x-100" fill="currentColor" aria-hidden="true">
+      <path d="M16 5h2v14h-2zM14.5 12 6 5v14z" />
+    </svg>
+  ),
   play: (
-    <svg viewBox="0 0 24 24" className="h-7 w-7" fill="currentColor" aria-hidden="true">
-      <path d="M8 5v14l11-7z" transform="matrix(-1 0 0 1 24 0)" />
+    <svg viewBox="0 0 24 24" className="h-7 w-7 rtl:-scale-x-100" fill="currentColor" aria-hidden="true">
+      <path d="M8 5v14l11-7z" />
     </svg>
   ),
   pause: (
@@ -68,13 +78,13 @@ const Icon = {
 };
 
 const round =
-  "flex items-center justify-center rounded-full transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0e7c9b] disabled:cursor-not-allowed disabled:opacity-35";
+  "flex items-center justify-center rounded-full transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brand)] disabled:cursor-not-allowed disabled:opacity-35";
 
-function Labeled({ label, children }: { label: string; children: React.ReactNode }) {
+function Labeled({ label, children, mobile = false }: { label: string; children: React.ReactNode; mobile?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-0.5">
       {children}
-      <span className="text-[0.68rem] text-slate-500 md:hidden" aria-hidden="true">
+      <span className={`text-[0.68rem] text-[var(--ink-3)] md:hidden ${mobile ? "" : "max-md:hidden"}`} aria-hidden="true">
         {label}
       </span>
     </div>
@@ -82,76 +92,59 @@ function Labeled({ label, children }: { label: string; children: React.ReactNode
 }
 
 export default function Controls(p: Props) {
-  const toggle = (on: boolean) => (on ? "bg-[#0e7c9b]/10 text-[#0e7c9b]" : "bg-slate-100 text-slate-400");
+  const t = useT();
+  const toggle = (on: boolean) => (on ? "bg-[var(--brand-50)] text-[var(--brand)]" : "bg-slate-100 text-slate-400");
+  const nextRate = RATES[(RATES.indexOf(p.rate) + 1) % RATES.length] ?? 1;
   return (
     <div className="flex flex-col gap-2 md:gap-1">
       {/* playback progress of the current step */}
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-label="התקדמות ההסבר" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(p.progress * 100)}>
-        <div className="muni-gradient h-full transition-[width] duration-200" style={{ width: `${Math.round(p.progress * 100)}%` }} />
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-label={t("explainProgress")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(p.progress * 100)}>
+        <div className="brand-gradient h-full transition-[width] duration-200" style={{ width: `${Math.round(p.progress * 100)}%` }} />
       </div>
 
       <div className="flex items-center justify-between gap-2">
-        {/* secondary (right side in RTL) */}
-        <div className="flex items-center gap-2">
-          <Labeled label="מההתחלה">
-            <button type="button" aria-label="השמע שוב" title="השמע שוב מההתחלה" onClick={p.onReplay} className={`${round} h-10 w-10 md:h-8 md:w-8 bg-slate-100 text-[#0e7c9b] hover:bg-slate-200`}>
+        <div className="flex items-center gap-1 md:gap-2">
+          <Labeled label={t("replay")}>
+            <button type="button" aria-label={t("replayTitle")} title={t("replayTitle")} onClick={p.onReplay} className={`${round} h-9 w-9 md:h-10 md:w-10 bg-slate-100 text-[var(--brand)] hover:bg-slate-200`}>
               {Icon.replay}
             </button>
           </Labeled>
-          <Labeled label={p.narrate ? "קול" : "מושתק"}>
-            <button
-              type="button"
-              aria-pressed={p.narrate}
-              aria-label={p.narrate ? "קריינות פעילה" : "קריינות כבויה"}
-              title={p.narrate ? "השתקת הקריינות" : "הפעלת הקריינות"}
-              onClick={p.onToggleNarrate}
-              className={`${round} h-10 w-10 md:h-8 md:w-8 ${toggle(p.narrate)}`}
-            >
+          <Labeled label={p.narrate ? t("sound") : t("muted")}>
+            <button type="button" aria-pressed={p.narrate} aria-label={p.narrate ? t("soundOn") : t("soundOff")} title={p.narrate ? t("soundOn") : t("soundOff")} onClick={p.onToggleNarrate} className={`${round} h-9 w-9 md:h-10 md:w-10 ${toggle(p.narrate)}`}>
               {p.narrate ? Icon.soundOn : Icon.soundOff}
             </button>
           </Labeled>
+          <Labeled label={t("speed")}>
+            <button type="button" aria-label={`${t("speed")}: ${p.rate}×`} title={`${t("speed")}: ${p.rate}×`} onClick={() => p.onRate(nextRate)} className={`${round} h-9 min-w-9 md:h-10 md:min-w-10 bg-slate-100 px-2 text-xs font-bold text-[var(--ink-2)] hover:bg-slate-200`}>
+              <span dir="ltr">{p.rate}×</span>
+            </button>
+          </Labeled>
+          <Labeled label={t("captions")}>
+            <button type="button" aria-pressed={p.captions} aria-label={p.captions ? t("captionsOn") : t("captionsOff")} title={p.captions ? t("captionsOn") : t("captionsOff")} onClick={p.onToggleCaptions} className={`${round} h-9 w-9 md:h-10 md:w-10 ${toggle(p.captions)}`}>
+              <UiIcon name="captions" />
+            </button>
+          </Labeled>
         </div>
 
-        {/* main transport */}
-        <div className="flex items-center gap-3 md:gap-5">
-          <Labeled label="הקודם">
-            <button type="button" aria-label="הקודם" title="המסך הקודם" onClick={p.onPrev} disabled={p.isFirst} className={`${round} h-11 w-11 md:h-8 md:w-8 bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50`}>
+        <div className="flex items-center gap-2 md:gap-4">
+          <Labeled label={t("prev")} mobile>
+            <button type="button" aria-label={t("prev")} title={t("prev")} onClick={p.onPrev} disabled={p.isFirst} className={`${round} h-10 w-10 md:h-11 md:w-11 bg-white text-[var(--ink-2)] shadow-sm ring-1 ring-[var(--line)] hover:bg-slate-50`}>
               {Icon.prev}
             </button>
           </Labeled>
-          <button
-            type="button"
-            aria-label={p.paused ? "המשך" : "השהה"}
-            title={p.paused ? "המשך" : "השהה"}
-            onClick={p.onTogglePause}
-            className={`${round} muni-gradient h-14 w-14 text-white shadow-md hover:brightness-105 md:h-10 md:w-10`}
-          >
+          <button type="button" aria-label={p.paused ? t("resume") : t("pause")} title={p.paused ? t("resume") : t("pause")} onClick={p.onTogglePause} className={`${round} brand-gradient h-12 w-12 text-white shadow-md hover:brightness-110`}>
             {p.paused ? Icon.play : Icon.pause}
           </button>
-          <Labeled label={p.isLast ? "סיום" : "הבא"}>
-            <button
-              type="button"
-              aria-label={p.isLast ? "סיום ההדרכה" : "הבא"}
-              title={p.isLast ? "סיום ההדרכה" : "המסך הבא"}
-              onClick={p.onNext}
-              className={`${round} h-11 w-11 md:h-8 md:w-8 bg-white text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50`}
-            >
-              {p.isLast ? <span aria-hidden="true">🎉</span> : Icon.next}
+          <Labeled label={p.isLast ? t("finish") : t("next")} mobile>
+            <button type="button" aria-label={p.isLast ? t("finish") : t("next")} title={p.isLast ? t("finish") : t("next")} onClick={p.onNext} className={`${round} h-10 w-10 md:h-11 md:w-11 bg-white text-[var(--ink-2)] shadow-sm ring-1 ring-[var(--line)] hover:bg-slate-50`}>
+              {p.isLast ? <UiIcon name="award" /> : Icon.next}
             </button>
           </Labeled>
         </div>
 
-        {/* secondary (left side in RTL) */}
         <div className="flex items-center gap-2">
-          <Labeled label={p.autoAdvance ? "אוטומטי" : "ידני"}>
-            <button
-              type="button"
-              aria-pressed={p.autoAdvance}
-              aria-label={p.autoAdvance ? "מעבר אוטומטי" : "מעבר ידני"}
-              title={p.autoAdvance ? "מעבר אוטומטי לשלב הבא (לחצו לביטול)" : "מעבר ידני (לחצו להפעלת מעבר אוטומטי)"}
-              onClick={p.onToggleAuto}
-              className={`${round} h-10 w-10 md:h-8 md:w-8 ${toggle(p.autoAdvance)}`}
-            >
+          <Labeled label={p.autoAdvance ? t("auto") : t("manual")}>
+            <button type="button" aria-pressed={p.autoAdvance} aria-label={p.autoAdvance ? t("autoOn") : t("autoOff")} title={p.autoAdvance ? t("autoOn") : t("autoOff")} onClick={p.onToggleAuto} className={`${round} h-9 w-9 md:h-10 md:w-10 ${toggle(p.autoAdvance)}`}>
               {Icon.auto}
             </button>
           </Labeled>
@@ -159,8 +152,8 @@ export default function Controls(p: Props) {
       </div>
 
       {p.isLast && p.finished && (
-        <p role="status" className="text-center text-sm font-medium text-[#0e7c9b]">
-          כל הכבוד! סיימתם את ההדרכה.
+        <p role="status" className="text-center text-sm font-medium text-[var(--brand)]">
+          {t("doneAll")}
         </p>
       )}
     </div>

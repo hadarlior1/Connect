@@ -16,15 +16,25 @@ export function isSpeechSupported(): boolean {
   return synth() !== undefined && typeof SpeechSynthesisUtterance !== "undefined";
 }
 
-// The same Hebrew voice is pinned for the whole session so every step sounds alike.
-let pinnedVoice: SpeechSynthesisVoice | undefined;
+// The same voice is pinned per language for the whole session so every step sounds alike.
+const pinned: Record<string, SpeechSynthesisVoice | undefined> = {};
 // Bumped by stopSpeaking so a speak() still waiting for voices is dropped.
 let generation = 0;
 
-function hebrewVoice(s: SpeechSynthesis): SpeechSynthesisVoice | undefined {
-  if (pinnedVoice) return pinnedVoice;
-  pinnedVoice = s.getVoices().find((v) => v.lang.toLowerCase().startsWith("he") || v.lang.toLowerCase().startsWith("iw"));
-  return pinnedVoice;
+function voiceFor(s: SpeechSynthesis, lang: "he" | "en"): SpeechSynthesisVoice | undefined {
+  if (pinned[lang]) return pinned[lang];
+  const voices = s.getVoices();
+  pinned[lang] =
+    lang === "en"
+      ? (voices.find((v) => /^en-(US|GB)/i.test(v.lang) && /natural|online|guy|andrew|david|mark/i.test(v.name)) ?? voices.find((v) => /^en/i.test(v.lang)))
+      : voices.find((v) => v.lang.toLowerCase().startsWith("he") || v.lang.toLowerCase().startsWith("iw"));
+  return pinned[lang];
+}
+
+export interface SpeakOptions {
+  lang?: "he" | "en";
+  /** Speed multiplier (1 = normal). */
+  rate?: number;
 }
 
 // Browsers load the voice list asynchronously; speaking before it arrives falls
@@ -49,7 +59,7 @@ export interface SpeakHandlers {
   onBoundary?: (charIndex: number) => void;
 }
 
-export function speak(text: string, handlers: SpeakHandlers = {}): void {
+export function speak(text: string, handlers: SpeakHandlers = {}, opts: SpeakOptions = {}): void {
   const s = synth();
   if (!s || !isSpeechSupported()) {
     handlers.onEnd?.(false);
@@ -58,21 +68,22 @@ export function speak(text: string, handlers: SpeakHandlers = {}): void {
   if (s.getVoices().length === 0) {
     const gen = generation;
     void whenVoicesReady(s).then(() => {
-      if (gen === generation) say(s, text, handlers);
+      if (gen === generation) say(s, text, handlers, opts);
     });
     return;
   }
-  say(s, text, handlers);
+  say(s, text, handlers, opts);
 }
 
-function say(s: SpeechSynthesis, text: string, handlers: SpeakHandlers): void {
+function say(s: SpeechSynthesis, text: string, handlers: SpeakHandlers, opts: SpeakOptions = {}): void {
   try {
     s.cancel();
+    const lang = opts.lang ?? "he";
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "he-IL";
-    const voice = hebrewVoice(s);
+    u.lang = lang === "en" ? "en-US" : "he-IL";
+    const voice = voiceFor(s, lang);
     if (voice) u.voice = voice;
-    u.rate = 0.95;
+    u.rate = 0.95 * (opts.rate ?? 1);
     u.onstart = () => handlers.onStart?.();
     u.onend = () => handlers.onEnd?.(true);
     u.onerror = () => handlers.onEnd?.(false);

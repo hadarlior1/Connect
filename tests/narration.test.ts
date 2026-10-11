@@ -44,7 +44,7 @@ describe("narrate", () => {
     const speak = vi.spyOn(speech, "speak").mockImplementation(() => {});
     narrate("9.9", "טקסט גיבוי");
     FakeAudio.last.onerror?.();
-    expect(speak).toHaveBeenCalledWith("טקסט גיבוי", expect.any(Object));
+    expect(speak).toHaveBeenCalledWith("טקסט גיבוי", expect.any(Object), expect.objectContaining({}));
   });
 
   it("stop pauses the audio and suppresses a late fallback", () => {

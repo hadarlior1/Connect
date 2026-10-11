@@ -41,7 +41,7 @@ describe("App", () => {
 
   it("navigates to step 4.5 from the nav and marks it current", () => {
     render(<App />);
-    const nav = screen.getByRole("navigation", { name: "תפריט מודולים" });
+    const nav = screen.getByRole("navigation", { name: "תוכן ההדרכה" });
     const target = findStep("4.5")!.step;
     const btn = within(nav).getByRole("button", { name: new RegExp(target.title) });
     fireEvent.click(btn);
@@ -90,7 +90,9 @@ describe("App", () => {
     expect(finish).toBeEnabled();
     fireEvent.click(finish);
     expect(loadProgress().done).toContain(last.id);
-    expect(screen.getByText(`${loadProgress().done.length}/${allSteps.length}`)).toBeInTheDocument();
+    expect(screen.getByRole("progressbar", { name: "שלבים שהושלמו" })).toHaveAttribute("aria-valuenow", String(loadProgress().done.length));
+    // finishing the course opens the certificate of completion
+    expect(screen.getByRole("dialog", { name: "תעודת סיום" })).toBeInTheDocument();
   });
 
   it("falls back to placeholders when media fails to load", () => {
@@ -101,15 +103,15 @@ describe("App", () => {
     const video = container.querySelector("video")!;
     fireEvent.error(video);
     expect(container.querySelector("video")).toBeNull();
-    expect(screen.getByAltText("אוהד מנקין, EPR מערכות")).toBeInTheDocument();
+    expect(screen.getByAltText("אוהד מנקין, EPR")).toBeInTheDocument();
     expect(screen.getByTestId("transcript")).toHaveTextContent(findStep("0.1")!.step.script);
   });
 
   it("swaps the still avatar for the video once the clip has data", () => {
     const { container } = render(<App />);
-    expect(screen.getByAltText("אוהד מנקין, EPR מערכות")).toBeInTheDocument();
+    expect(screen.getByAltText("אוהד מנקין, EPR")).toBeInTheDocument();
     fireEvent.loadedData(container.querySelector("video")!);
-    expect(screen.queryByAltText("אוהד מנקין, EPR מערכות")).toBeNull();
+    expect(screen.queryByAltText("אוהד מנקין, EPR")).toBeNull();
     expect(container.querySelector("video")).not.toHaveClass("hidden");
   });
 
@@ -121,8 +123,9 @@ describe("App", () => {
     expect(screen.getByRole("note")).toHaveTextContent(warned.warning!);
     unmount();
     setLast(tipped.id);
-    render(<App />);
-    expect(screen.getByText(tipped.tip!)).toBeInTheDocument();
+    window.history.replaceState(null, "", "/"); // the address would otherwise reopen the previous step
+    const { container } = render(<App />);
+    expect(container.querySelector(".note-tip")).toHaveTextContent(tipped.tip!);
   });
 
   it("resets progress from the nav footer after confirmation", () => {
@@ -160,7 +163,7 @@ describe("App", () => {
     markDone("9.9");
     markDone("0.1");
     render(<App />);
-    expect(screen.getByText(`1/${allSteps.length}`)).toBeInTheDocument();
+    expect(screen.getByRole("progressbar", { name: "שלבים שהושלמו" })).toHaveAttribute("aria-valuenow", "1");
   });
 
   it("keeps the screenshot hidden until it loads", () => {

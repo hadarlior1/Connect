@@ -22,7 +22,7 @@ describe("AvatarPanel playback order", () => {
     fireEvent.error(container.querySelector("video")!);
 
     expect(container.querySelector("video")).toBeNull();
-    expect(speak).toHaveBeenCalledWith(step.id, step.script, expect.any(Object));
+    expect(speak).toHaveBeenCalledWith(step.id, step.script, expect.any(Object), expect.any(Object));
   });
 
   it("narrates straight away when there is no video and no intro", () => {
@@ -44,7 +44,7 @@ describe("AvatarPanel playback order", () => {
     const { container } = render(<AvatarPanel step={step} narrate={false} />);
     fireEvent.error(container.querySelector("video")!);
     expect(speak).not.toHaveBeenCalled();
-    expect(screen.getByText("🔇 קריינות כבויה")).toBeInTheDocument();
+    expect(screen.getByText("קריינות כבויה")).toBeInTheDocument();
   });
 
   it("animates the avatar while speaking", () => {
@@ -54,7 +54,7 @@ describe("AvatarPanel playback order", () => {
     });
     const { container } = render(<AvatarPanel step={step} narrate />);
     fireEvent.error(container.querySelector("video")!);
-    expect(screen.getByAltText("אוהד מנקין, EPR מערכות")).toHaveAttribute("data-speaking", "true");
+    expect(screen.getByAltText("אוהד מנקין, EPR")).toHaveAttribute("data-speaking", "true");
   });
 
   it("moves the mouth with the voice level", () => {

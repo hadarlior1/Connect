@@ -4,6 +4,8 @@ import { screenUrl } from "../lib/media";
 import KaraokeText from "./KaraokeText";
 import { stepLabel } from "../content/label";
 import { sentenceRange } from "../lib/words";
+import { useT } from "../lib/i18n";
+import Icon, { MODULE_ICON } from "./Icon";
 
 interface Props {
   module: Module;
@@ -20,6 +22,8 @@ interface Props {
   onNext?: () => void;
   canPrev?: boolean;
   canNext?: boolean;
+  /** Subtitles under the screenshot (the player's captions switch). */
+  showCaptions?: boolean;
 }
 
 function HighlightRing({ step }: { step: Step }) {
@@ -36,16 +40,15 @@ function HighlightRing({ step }: { step: Step }) {
 }
 
 function Placeholder({ module, step }: Props) {
+  const t = useT();
   return (
     <div
       data-testid="screen-placeholder"
-      className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-3 rounded-xl bg-gradient-to-br from-[#0e7c9b]/10 to-[#4fd1b5]/15 p-6 text-center"
+      className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-3 rounded-xl bg-[var(--brand-50)] p-6 text-center"
     >
-      <span className="text-5xl" aria-hidden="true">
-        {module.icon}
-      </span>
-      <p className="text-xl font-bold text-[#0e7c9b] md:text-2xl">{step.title}</p>
-      <p className="text-sm text-slate-500">צילום המסך לשלב זה יתווסף בקרוב</p>
+      <Icon name={MODULE_ICON[module.id]} className="h-12 w-12 text-[var(--brand)]" />
+      <p className="text-xl font-bold text-[var(--brand)] md:text-2xl">{step.title}</p>
+      <p className="text-sm text-[var(--ink-3)]">{t("screenSoon")}</p>
     </div>
   );
 }
@@ -118,10 +121,9 @@ function useZoom(step: Step, enabled: boolean, frameRef: React.RefObject<HTMLDiv
   return box;
 }
 
-const arrow =
-  "absolute top-[16%] z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-2xl text-[#0e7c9b] shadow-lg ring-1 ring-slate-200 backdrop-blur transition hover:scale-110 hover:bg-white focus-visible:outline-2 focus-visible:outline-[#0e7c9b] disabled:pointer-events-none disabled:opacity-0 md:h-14 md:w-14";
 
-export default function StepStage({ module, step, focusTitle = false, activeWord = -1, captionText, presenter, onPrev, onNext, canPrev = true, canNext = true }: Props) {
+export default function StepStage({ module, step, focusTitle = false, activeWord = -1, captionText, presenter, showCaptions = true }: Props) {
+  const t = useT();
   const [failed, setFailed] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<string | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -133,7 +135,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
   const [ratio, setRatio] = useState<number | null>(null);
   const [fullView, setFullView] = useState(false);
   const frameRef = useRef<HTMLDivElement>(null);
-  const fitH = useFitHeight(step.tip || step.warning ? 20.25 : 17.5);
+  const fitH = useFitHeight(step.tip || step.warning ? 23.75 : 21);
   const zoom = useZoom(step, !fullView && showImage, frameRef, ratio, isMobile ? undefined : fitH);
   const spoken = captionText ?? step.script;
   const panRef = useRef<HTMLDivElement>(null);
@@ -143,12 +145,13 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
   }, [zoom, step.highlight]);
 
   return (
-    <section aria-labelledby="step-title" className="rounded-2xl bg-white p-3 shadow-sm md:px-3 md:py-2">
-      <div className="mb-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 md:mb-1.5">
-        <span className="rounded-full bg-[#0e7c9b]/10 px-3 py-0.5 text-xs font-medium text-[#0e7c9b]">
-          {module.icon} {module.title} · שלב {stepLabel(step.id)}
+    <section aria-labelledby="step-title" className="rounded-2xl border border-[var(--line)] bg-white p-3 md:px-3 md:py-2">
+      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 md:mb-1.5">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-50)] px-3 py-1 text-xs font-semibold text-[var(--brand)]">
+          <Icon name={MODULE_ICON[module.id]} className="h-3.5 w-3.5" />
+          {module.title} · {t("step")} <bdi dir="ltr">{stepLabel(step.id)}</bdi>
         </span>
-        <h2 id="step-title" ref={titleRef} tabIndex={-1} className="text-xl focus:outline-none font-bold text-slate-800 md:text-lg">
+        <h2 id="step-title" ref={titleRef} tabIndex={-1} className="text-xl font-bold text-[var(--ink)] focus:outline-none md:text-lg">
           {step.title}
         </h2>
       </div>
@@ -164,7 +167,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
                 key={step.id}
                 data-role="screen"
                 src={screenUrl(step.id)}
-                alt={`צילום מסך: ${step.title}`}
+                alt={`${t("screenshot")}: ${step.title}`}
                 className={`block w-full ${loaded === step.id ? "" : "invisible"}`}
                 onLoad={(e) => {
                   setLoaded(step.id);
@@ -180,9 +183,10 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
               <button
                 type="button"
                 onClick={() => setFullView((v) => !v)}
-                className="absolute right-2 top-2 z-30 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-[#0e7c9b] shadow ring-1 ring-slate-200"
+                className="absolute bottom-2 right-2 z-30 inline-flex min-h-8 items-center gap-1.5 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[var(--brand)] shadow-md ring-1 ring-[var(--line)] backdrop-blur hover:bg-white"
               >
-                {fullView ? (step.highlight ? "🔍 התמקד באזור" : "🔍 הגדל") : "⤢ כל המסך"}
+                <Icon name={fullView ? "zoom" : "expand"} className="h-3.5 w-3.5" />
+                {fullView ? (step.highlight ? t("focusArea") : t("enlarge")) : t("wholeScreen")}
               </button>
             )}
           </div>
@@ -191,17 +195,6 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
             <Placeholder module={module} step={step} />
             <HighlightRing step={step} />
           </div>
-        )}
-        {/* RTL: previous screen on the right edge, next screen on the left edge */}
-        {onPrev && (
-          <button type="button" aria-label="המסך הקודם" onClick={onPrev} disabled={!canPrev} className={`${arrow} right-1 max-md:hidden md:-right-5`}>
-            <span aria-hidden="true">›</span>
-          </button>
-        )}
-        {onNext && (
-          <button type="button" aria-label="המסך הבא" onClick={onNext} disabled={!canNext} className={`${arrow} left-1 max-md:hidden md:-left-5`}>
-            <span aria-hidden="true">‹</span>
-          </button>
         )}
         {presenter && (
           // Always the same corner (bottom-left) so the presenter never jumps between steps.
@@ -216,7 +209,7 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
       </div>
 
       {/* Subtitles: the sentence being spoken, like a video's captions. Fixed height, so nothing jumps. */}
-      <div data-testid="caption" className="subtitles">
+      <div data-testid="caption" className={`subtitles ${showCaptions ? "" : "sr-only"}`}>
         <p>
           <KaraokeText text={spoken} active={activeWord} range={sentenceRange(spoken, Math.max(activeWord, 0))} />
         </p>
@@ -226,19 +219,19 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
         <div className="mt-2 flex flex-col gap-1.5">
           {step.warning && (
             <p role="note" className="note note-warn">
-              <span aria-hidden="true">⚠️</span> <strong>שימו לב:</strong> {step.warning}
+              <Icon name="alert" className="inline h-4 w-4 align-[-3px]" /> <strong>{t("note")}</strong> {step.warning}
             </p>
           )}
           {step.tip && (
             <p className="note note-tip">
-              <span aria-hidden="true">💡</span> <strong>טיפ:</strong> {step.tip}
+              <Icon name="lightbulb" className="inline h-4 w-4 align-[-3px]" /> <strong>{t("tip")}</strong> {step.tip}
             </p>
           )}
         </div>
       )}
 
       <details className="transcript mt-2">
-        <summary>התמלול המלא של השלב</summary>
+        <summary>{t("transcript")}</summary>
         <p data-testid="transcript">
           <KaraokeText text={step.script} active={captionText ? -1 : activeWord} />
         </p>

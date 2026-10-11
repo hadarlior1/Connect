@@ -17,8 +17,11 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "public" / "narration"
 
 
-def load_steps() -> list[dict]:
-    code = "import { allSteps } from './src/content/lessons'; console.log(JSON.stringify(allSteps.map(s => ({ id: s.id, script: s.script }))));"
+def load_steps(lang: str = "he") -> list[dict]:
+    if lang == "en":
+        code = "import { modulesEn } from './src/content/lessons.en'; console.log(JSON.stringify(modulesEn.flatMap(m => m.steps).map(s => ({ id: s.id, script: s.script }))));"
+    else:
+        code = "import { allSteps } from './src/content/lessons'; console.log(JSON.stringify(allSteps.map(s => ({ id: s.id, script: s.script }))));"
     out = subprocess.run(["npx", "tsx", "-e", code], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", shell=True, check=True)
     return json.loads(out.stdout.strip().splitlines()[-1])
 
@@ -28,13 +31,15 @@ async def main() -> None:
     ap.add_argument("--voice", default="he-IL-AvriNeural")
     ap.add_argument("--rate", default="+0%")
     ap.add_argument("--only", default="")
+    ap.add_argument("--lang", default="he", choices=["he", "en"], help="en: English text → public/narration/en/ (use an English voice)")
     args = ap.parse_args()
     only = {s for s in args.only.split(",") if s}
-    OUT.mkdir(parents=True, exist_ok=True)
-    for step in load_steps():
+    out = OUT / "en" if args.lang == "en" else OUT
+    out.mkdir(parents=True, exist_ok=True)
+    for step in load_steps(args.lang):
         if only and step["id"] not in only:
             continue
-        target = OUT / f"{step['id']}.mp3"
+        target = out / f"{step['id']}.mp3"
         await edge_tts.Communicate(step["script"], args.voice, rate=args.rate).save(str(target))
         print(f"{step['id']}: {target.stat().st_size // 1024} KB")
 

@@ -4,9 +4,17 @@
 // (drives the avatar's "talking" animation).
 import { pauseSpeaking, resumeSpeaking, speak, stopSpeaking } from "./speech";
 import { wordAtChar, wordAtProgress } from "./words";
+import { EN_NARRATION } from "../content/videos";
 
-export function narrationUrl(id: string): string {
-  return `/narration/${id}.mp3`;
+/** Hebrew narration in /narration/<id>.mp3, English in /narration/en/<id>.mp3. */
+export function narrationUrl(id: string, lang: "he" | "en" = "he"): string {
+  return lang === "en" ? `/narration/en/${id}.mp3` : `/narration/${id}.mp3`;
+}
+
+export interface NarrationOptions {
+  lang?: "he" | "en";
+  /** Playback speed (1 = normal). */
+  rate?: number;
 }
 
 export interface NarrationHandlers {
@@ -19,11 +27,11 @@ export interface NarrationHandlers {
   onProgress?: (fraction: number) => void;
 }
 
-/** Calling it stops the narration; it can also pause and resume it. */
-export type NarrationControl = (() => void) & { pause: () => void; resume: () => void };
+/** Calling it stops the narration; it can also pause, resume and change speed. */
+export type NarrationControl = (() => void) & { pause: () => void; resume: () => void; setRate?: (rate: number) => void };
 
-function control(stop: () => void, pause: () => void, resume: () => void): NarrationControl {
-  return Object.assign(stop, { pause, resume });
+function control(stop: () => void, pause: () => void, resume: () => void, setRate?: (rate: number) => void): NarrationControl {
+  return Object.assign(stop, { pause, resume, setRate });
 }
 
 let audioCtx: AudioContext | undefined;
@@ -62,7 +70,7 @@ function analyserFor(audio: HTMLAudioElement): (() => number) | null {
 const synthetic = (t: number) => 0.35 + 0.3 * Math.abs(Math.sin(t / 90)) + 0.15 * Math.abs(Math.sin(t / 37));
 
 /** Starts narrating a step; returns a function that stops it. */
-export function narrate(id: string, text: string, handlers: NarrationHandlers = {}): NarrationControl {
+export function narrate(id: string, text: string, handlers: NarrationHandlers = {}, opts: NarrationOptions = {}): NarrationControl {
   let stopped = false;
   let finished = false;
   let timer: ReturnType<typeof setInterval> | undefined;
@@ -89,7 +97,9 @@ export function narrate(id: string, text: string, handlers: NarrationHandlers = 
   const fallback = () => {
     if (stopped) return;
     let speaking = false;
-    speak(text, {
+    speak(
+      text,
+      {
       onStart: () => {
         speaking = true;
         handlers.onStart?.();
@@ -104,11 +114,17 @@ export function narrate(id: string, text: string, handlers: NarrationHandlers = 
         speaking = false;
         finish(completed);
       },
-    });
+      },
+      { lang: opts.lang, rate: opts.rate },
+    );
   };
 
+  // English recordings not generated yet: speak with the browser's English voice.
+  const noRecording = opts.lang === "en" && !EN_NARRATION;
   try {
-    audio = new Audio(narrationUrl(id));
+    if (noRecording) throw new Error("no English recording");
+    audio = new Audio(narrationUrl(id, opts.lang));
+    if (opts.rate && opts.rate !== 1) audio.playbackRate = opts.rate;
   } catch {
     fallback();
     return control(
@@ -162,6 +178,9 @@ export function narrate(id: string, text: string, handlers: NarrationHandlers = 
     () => {
       if (a.error) resumeSpeaking();
       else void (a.play() as Promise<void> | undefined)?.catch?.(() => {});
+    },
+    (rate) => {
+      a.playbackRate = rate;
     },
   );
 }
