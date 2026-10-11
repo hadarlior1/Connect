@@ -27,7 +27,9 @@ layout doesn't jump between steps (the original used a ~1270px wide window at br
 ## Verify
 
 Run `npm run dev`, go through every step, and check that each ring sits exactly on the control the
-script talks about — on desktop *and* at phone width (375–390px), where the image zooms onto the ring.
+script talks about. The site zooms onto the ring on every screen size (the highlighted area fills
+~60% of the frame), so a loose or misplaced rectangle is very visible — and a step without a
+highlight is shown full width from the top. Check on desktop *and* at phone width (375–390px).
 Fix percentages by hand when needed (small steps of 0.5–1%).
 
 ## Privacy checklist before committing
