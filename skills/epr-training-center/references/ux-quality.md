@@ -20,6 +20,14 @@ does. Check them on every new training center — content changes can break them
 - One navigation per level: sidebar on wide screens, chapter circles only where there is no sidebar;
   no duplicate prev/next arrows on the image.
 
+## Orientation
+- A visible **Home** button ("דף הבית") on every lesson screen — a clickable logo alone is not
+  discoverable (a real user asked "why can't I get back to the main screen?").
+- Progress shown in words, not just a ring: "התקדמות · 2/29 · 7%", with a tooltip
+  "התקדמות: 2 מתוך 29 שלבים". A step counts as done when the learner moves on from it (next or
+  auto-advance); progress is per browser (localStorage). Chapter cards on the welcome screen show
+  progress per chapter.
+
 ## Player and interaction
 - Speed 0.75–1.5×, captions on/off, replay, sound, auto-advance; Space pauses; arrows follow the
   reading direction (Hebrew: ← is next).

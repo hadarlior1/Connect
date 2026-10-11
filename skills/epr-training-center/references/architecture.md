@@ -31,7 +31,8 @@ src/
     words.ts          Word timing estimate + sentenceRange (subtitles show the current sentence)
     progress.ts       done steps, last step
   components/
-    Header.tsx        White bar: EPR logo + course name (→ home), progress ring, help, language, menu
+    Header.tsx        White bar: EPR logo + course name, a visible "דף הבית" button, progress ring
+                      with a labelled readout ("התקדמות · 2/29 · 7%"), help, language, menu
     Welcome.tsx       Hero with the promise, presenter cut-out, 4 stats, CTA / "continue", chapter cards
     ModuleNav.tsx     Course contents (docked at xl, drawer below), minutes per chapter
     ProcessStepper.tsx Chapter circles (below xl) / chapter name (xl) + step dots (32px targets)
