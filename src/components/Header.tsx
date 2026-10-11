@@ -24,7 +24,7 @@ export default function Header({ done, total, navOpen, onToggleNav, onHome, onTo
   return (
     <header className="relative z-20 border-b border-[var(--line)] bg-white">
       <div className="flex items-center gap-2 px-3 py-1.5 md:px-5">
-        <button type="button" onClick={onHome} className="flex min-w-0 items-center gap-3 rounded-xl py-1 pe-2 focus-visible:outline-2 focus-visible:outline-[var(--brand)]" aria-label={t("home")}>
+        <button type="button" onClick={onHome} className="flex min-w-0 items-center gap-3 rounded-xl py-1 pe-2 focus-visible:outline-2 focus-visible:outline-[var(--brand)]" aria-label={`${t("brand")} · ${t("home")}`}>
           <img src={LOGO} alt="EPR Systems" className="h-8 w-auto shrink-0 md:h-9" />
           <span className="hidden h-7 w-px bg-[var(--line)] sm:block" aria-hidden="true" />
           <span className="min-w-0 text-start leading-tight">
@@ -34,7 +34,11 @@ export default function Header({ done, total, navOpen, onToggleNav, onHome, onTo
         </button>
 
         <div className="ms-auto flex items-center gap-1">
-          <div className="flex items-center gap-2 pe-1" role="group" aria-label={t("progress")}>
+          <button type="button" onClick={onHome} className={iconBtn} aria-label={t("home")} title={t("home")}>
+            <Icon name="home" />
+            <span className="hidden md:inline">{t("home")}</span>
+          </button>
+          <div className="flex items-center gap-2 pe-2" role="group" aria-label={t("progress")} title={`${t("progress")}: ${done} ${t("of")} ${total} ${t("statSteps")}`}>
             <svg viewBox="0 0 36 36" className="h-9 w-9 -rotate-90" role="progressbar" aria-label={t("stepsDone")} aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}>
               <circle cx="18" cy="18" r={r} fill="none" stroke="var(--line)" strokeWidth="3.5" />
               <circle cx="18" cy="18" r={r} fill="none" stroke="url(#ring)" strokeWidth="3.5" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - pct / 100)} style={{ transition: "stroke-dashoffset 400ms ease-out" }} />
@@ -45,8 +49,14 @@ export default function Header({ done, total, navOpen, onToggleNav, onHome, onTo
                 </linearGradient>
               </defs>
             </svg>
-            <span className="hidden text-sm font-semibold text-[var(--ink-2)] sm:block" dir="ltr">
-              {pct}%
+            <span className="hidden leading-tight sm:block">
+              <span className="block text-[0.7rem] text-[var(--ink-3)]">{t("progress")}</span>
+              <span className="block text-sm font-bold text-[var(--ink)]">
+                <bdi dir="ltr">
+                  {done}/{total}
+                </bdi>{" "}
+                <span className="font-medium text-[var(--ink-3)]">· {pct}%</span>
+              </span>
             </span>
           </div>
           <button type="button" onClick={onHelp} className={iconBtn} aria-label={t("help")} title={t("help")}>
