@@ -1,4 +1,4 @@
-const KEY = "muni-training-progress-v1";
+const KEY = "eprconnect-training-progress-v1";
 
 export type Progress = { done: string[]; last?: string };
 

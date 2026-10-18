@@ -1,11 +1,16 @@
 import { MODULE_INTROS, STEP_VIDEOS } from "../content/videos";
 
 // Media locations (files live under /public).
-// Same pose with closed / half-open / open mouth; swapped by voice level for lip movement.
-export const TALK_FRAMES = ["/avatar/fig-0.webp", "/avatar/fig-1.webp", "/avatar/fig-2.webp"];
+// Narrator orb (no on-screen presenter): a single round image that glows with the voice level.
+export const TALK_FRAMES = ["/brand/voice.webp"];
 
 export function screenUrl(id: string): string {
   return `/screens/${id}.jpg`;
+}
+
+/** Silent screen recording shown in place of the screenshot (steps with `clip`). */
+export function clipUrl(id: string): string {
+  return `/clips/${id}.mp4`;
 }
 
 /** The module's opening video, or undefined when none was recorded. */

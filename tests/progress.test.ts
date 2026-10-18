@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { loadProgress, markDone, setLast, resetProgress } from "../src/lib/progress";
 
-const KEY = "muni-training-progress-v1";
+const KEY = "eprconnect-training-progress-v1";
 
 describe("progress store", () => {
   beforeEach(() => {

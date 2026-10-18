@@ -75,7 +75,7 @@ export default function Welcome({ modules, done, resumeId, onStart }: Props) {
 
           <figure className="relative mx-auto hidden w-[clamp(12rem,22vw,19rem)] md:block">
             <div className="absolute inset-x-0 bottom-0 top-1/4 rounded-full bg-[var(--accent)]/30 blur-3xl" aria-hidden="true" />
-            <img src="/brand/ohad.webp" alt={t("presenter")} className="relative drop-shadow-2xl" width={404} height={946} />
+            <img src="/brand/hero.webp" alt="EprConnect" className="relative drop-shadow-2xl" width={520} height={550} />
             <figcaption className="absolute bottom-6 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 whitespace-nowrap rounded-full bg-white px-4 py-1.5 text-center text-sm text-[var(--ink)] shadow-lg">
               <strong>{t("presenter")}</strong>
               <span className="block text-xs text-[var(--ink-3)]">{t("presenterRole")}</span>

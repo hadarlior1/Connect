@@ -435,3 +435,24 @@ html[lang="en"] body {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- EprConnect: voice-only narrator ---------- */
+/* No presenter figure: a round EprConnect orb that pulses and glows with the narration. */
+.avatar-face,
+.avatar-media {
+  aspect-ratio: 1;
+}
+.avatar-frame {
+  border-radius: 9999px;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+.is-speaking .avatar-face {
+  transform: scale(calc(1 + var(--lvl, 0) * 0.08));
+}
+@media (max-width: 767px) {
+  .presenter-slot .avatar-frame,
+  .presenter-slot .avatar-media {
+    transform: none;
+  }
+}

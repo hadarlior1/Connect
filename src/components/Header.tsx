@@ -16,7 +16,8 @@ const iconBtn =
   "flex h-10 min-w-10 items-center justify-center gap-1.5 rounded-xl px-2 text-sm font-medium text-[var(--ink-2)] transition-colors hover:bg-[var(--brand-50)] hover:text-[var(--brand)] focus-visible:outline-2 focus-visible:outline-[var(--brand)]";
 
 // White top bar: EPR logo and course name, then progress ring, help, language and menu.
-export default function Header({ done, total, navOpen, onToggleNav, onHome, onToggleLang, onHelp }: Props) {
+// The EprConnect training is Hebrew only, so the language switch (onToggleLang) is not shown.
+export default function Header({ done, total, navOpen, onToggleNav, onHome, onHelp }: Props) {
   const t = useT();
   const pct = total ? Math.round((done / total) * 100) : 0;
   const r = 15;
@@ -62,10 +63,6 @@ export default function Header({ done, total, navOpen, onToggleNav, onHome, onTo
           <button type="button" onClick={onHelp} className={iconBtn} aria-label={t("help")} title={t("help")}>
             <Icon name="help" />
             <span className="hidden lg:inline">{t("help")}</span>
-          </button>
-          <button type="button" onClick={onToggleLang} className={iconBtn} aria-label={t("languageLabel")} title={t("languageLabel")}>
-            <Icon name="globe" />
-            <span className="hidden sm:inline">{t("language")}</span>
           </button>
           <button
             type="button"

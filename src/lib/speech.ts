@@ -2,7 +2,7 @@
 // Used for steps that have no recorded avatar video. Every call is defensive:
 // unsupported browsers, missing Hebrew voices or blocked autoplay just stay silent.
 
-const NARRATION_KEY = "muni-training-narration-v1";
+const NARRATION_KEY = "eprconnect-training-narration-v1";
 
 function synth(): SpeechSynthesis | undefined {
   try {

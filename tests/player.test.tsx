@@ -21,7 +21,6 @@ afterEach(() => vi.restoreAllMocks());
 describe("player bar", () => {
   it("pauses and resumes the narration", () => {
     const { container } = render(<App />);
-    fireEvent.error(container.querySelector("video")!);
     fireEvent.click(screen.getByRole("button", { name: "השהה" }));
     expect(pause).toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "המשך" }));
@@ -30,7 +29,6 @@ describe("player bar", () => {
 
   it("shows playback progress", () => {
     const { container } = render(<App />);
-    fireEvent.error(container.querySelector("video")!);
     act(() => handlers.onProgress?.(0.5));
     expect(screen.getByRole("progressbar", { name: "התקדמות ההסבר" })).toHaveAttribute("aria-valuenow", "50");
   });

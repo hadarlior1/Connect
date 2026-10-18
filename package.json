@@ -1,5 +1,5 @@
 {
-  "name": "portel-sifkim",
+  "name": "connect",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,8 +11,9 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "deploy": "wrangler deploy",
-    "heygen": "tsx scripts/build-heygen-scripts.ts",
-    "batches": "tsx scripts/build-batches.ts"
+    "screens": "python scripts/build-screens.py",
+    "clips": "python scripts/build-clips.py",
+    "narration": "python scripts/build-narration.py"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

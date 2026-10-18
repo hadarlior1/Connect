@@ -4,7 +4,7 @@ import { createContext, useContext } from "react";
 // the course text to src/content/lessons.en.ts. The portal screenshots stay in Hebrew.
 export type Lang = "he" | "en";
 
-const KEY = "epr-training-lang-v1";
+const KEY = "eprconnect-training-lang-v1";
 
 export function loadLang(): Lang {
   try {
@@ -29,8 +29,8 @@ export const useLang = () => useContext(LangContext);
 
 const he = {
   brand: "מרכז ההדרכה של EPR",
-  course: "פורטל הספקים",
-  courseFull: "הדרכת פורטל הספקים",
+  course: "EprConnect",
+  courseFull: "הכניסה החדשה למערכות EPR",
   openMenu: "פתיחת תפריט",
   closeMenu: "סגירת תפריט",
   contents: "תוכן ההדרכה",
@@ -73,8 +73,8 @@ const he = {
   captionsOff: "הצגת הכתוביות",
   explainProgress: "התקדמות ההסבר",
   doneAll: "כל הכבוד! סיימתם את ההדרכה.",
-  presenter: "אוהד מנקין",
-  presenterRole: "מנהל תחום מערכות פיננסיות, EPR",
+  presenter: "המדריך הקולי",
+  presenterRole: "EPR מערכות",
   statusPaused: "מושהה",
   statusVideo: "מציג סרטון",
   statusSpeaking: "מסביר…",
@@ -84,14 +84,14 @@ const he = {
   stepVideo: "סרטון הסבר",
   help: "צריכים עזרה?",
   helpTitle: "עזרה ותמיכה",
-  helpBody: "נתקעתם בפורטל? פנו לרשות שאיתה אתם עובדים, או לצוות התמיכה של EPR.",
+  helpBody: "נתקעתם בהתקנה או בכניסה? פנו לאיש המחשוב ברשות, או לצוות התמיכה של EPR.",
   close: "סגירה",
   language: "English",
   languageLabel: "Switch to English",
   // welcome
-  heroEyebrow: "הדרכה רשמית · EPR מערכות",
-  heroPromise: "תוך 10 דקות תגישו את החשבונית הראשונה שלכם בפורטל",
-  heroSub: "הדרכה מודרכת צעד אחר צעד עם אוהד מנקין: כניסה לפורטל, הזמנות, הגשת חשבונית, כללים חשובים וכרטסת.",
+  heroEyebrow: "חדש · EPR מערכות",
+  heroPromise: "EprConnect: הכניסה החדשה, הפשוטה והמאובטחת למערכות EPR",
+  heroSub: "הדרכה קצרה, צעד אחר צעד: הורדת קובץ ההתקנה, התקנה בכמה לחיצות, הזדהות עם תעודת זהות וקוד אימות, ובחירת התוכנה.",
   heroStart: "התחילו את ההדרכה",
   heroContinue: "המשיכו מאיפה שעצרתם",
   heroRestart: "התחילו מההתחלה",
@@ -103,10 +103,10 @@ const he = {
   minutes: "דק׳",
   notStarted: "טרם התחיל",
   inProgress: "בתהליך",
-  trust: "מבית EPR מערכות · עבור ספקי הרשויות המקומיות בפורטל Muni",
+  trust: "מבית EPR מערכות · לעובדי הרשויות המקומיות",
   // quiz
   quizTitle: "בדיקת הבנה",
-  quizIntro: "שתיים־שלוש שאלות קצרות לסיום הפרק",
+  quizIntro: "שאלה או שתיים לסיום הפרק",
   check: "בדיקה",
   correct: "נכון!",
   wrong: "לא בדיוק.",
@@ -132,8 +132,8 @@ type Strings = { [K in keyof typeof he]: string };
 
 const en: Strings = {
   brand: "EPR Training Center",
-  course: "Supplier Portal",
-  courseFull: "Supplier Portal Training",
+  course: "EprConnect",
+  courseFull: "The new sign-in to EPR systems",
   openMenu: "Open menu",
   closeMenu: "Close menu",
   contents: "Course contents",
@@ -176,8 +176,8 @@ const en: Strings = {
   captionsOff: "Show captions",
   explainProgress: "Explanation progress",
   doneAll: "Well done! You have completed the course.",
-  presenter: "Ohad Menkin",
-  presenterRole: "Finance Systems Lead, EPR",
+  presenter: "Voice guide",
+  presenterRole: "EPR Systems",
   statusPaused: "Paused",
   statusVideo: "Playing",
   statusSpeaking: "Explaining…",
@@ -187,13 +187,13 @@ const en: Strings = {
   stepVideo: "Explanation video",
   help: "Need help?",
   helpTitle: "Help & support",
-  helpBody: "Stuck in the portal? Contact the local authority you work with, or the EPR support team.",
+  helpBody: "Stuck installing or signing in? Contact your authority's IT person or the EPR support team.",
   close: "Close",
   language: "עברית",
   languageLabel: "החלפה לעברית",
   heroEyebrow: "Official training · EPR Systems",
-  heroPromise: "Submit your first invoice in the portal within 10 minutes",
-  heroSub: "A guided, step-by-step course with Ohad Menkin: signing in, purchase orders, submitting an invoice, key rules and your account ledger.",
+  heroPromise: "EprConnect: the new, simple and secure sign-in to EPR systems",
+  heroSub: "A short step-by-step guide: download the installer, install in a few clicks, verify with your ID and a code, and choose your program.",
   heroStart: "Start the course",
   heroContinue: "Continue where you left off",
   heroRestart: "Start from the beginning",
@@ -205,9 +205,9 @@ const en: Strings = {
   minutes: "min",
   notStarted: "Not started",
   inProgress: "In progress",
-  trust: "By EPR Systems · for local-authority suppliers on the Muni portal",
+  trust: "By EPR Systems · for local-authority staff",
   quizTitle: "Knowledge check",
-  quizIntro: "Two or three short questions to wrap up the chapter",
+  quizIntro: "One or two questions to wrap up the chapter",
   check: "Check",
   correct: "Correct!",
   wrong: "Not quite.",

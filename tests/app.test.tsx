@@ -39,10 +39,10 @@ describe("App", () => {
     expect(loadProgress().last).toBe("1.1");
   });
 
-  it("navigates to step 4.5 from the nav and marks it current", () => {
+  it("navigates to step 3.6 from the nav and marks it current", () => {
     render(<App />);
     const nav = screen.getByRole("navigation", { name: "תוכן ההדרכה" });
-    const target = findStep("4.5")!.step;
+    const target = findStep("3.6")!.step;
     const btn = within(nav).getByRole("button", { name: new RegExp(target.title) });
     fireEvent.click(btn);
     expect(heading()).toHaveTextContent(target.title);
@@ -77,9 +77,9 @@ describe("App", () => {
   });
 
   it("restores the last step on load", () => {
-    setLast("4.5");
+    setLast("3.6");
     render(<App />);
-    expect(heading()).toHaveTextContent(findStep("4.5")!.step.title);
+    expect(heading()).toHaveTextContent(findStep("3.6")!.step.title);
   });
 
   it("shows the finish label on the last step and marks it done", () => {
@@ -100,28 +100,25 @@ describe("App", () => {
     const img = container.querySelector("img[data-role='screen']")!;
     fireEvent.error(img);
     expect(screen.getByTestId("screen-placeholder")).toBeInTheDocument();
-    const video = container.querySelector("video")!;
-    fireEvent.error(video);
+    // no avatar videos in this training: the narrator orb shows straight away
     expect(container.querySelector("video")).toBeNull();
-    expect(screen.getByAltText("אוהד מנקין, EPR")).toBeInTheDocument();
+    expect(screen.getByAltText("המדריך הקולי, EPR")).toBeInTheDocument();
     expect(screen.getByTestId("transcript")).toHaveTextContent(findStep("0.1")!.step.script);
   });
 
-  it("swaps the still avatar for the video once the clip has data", () => {
+  it("plays the screen recording over the screenshot on clip steps", () => {
+    const clipped = allSteps.find((s) => s.clip)!;
+    setLast(clipped.id);
     const { container } = render(<App />);
-    expect(screen.getByAltText("אוהד מנקין, EPR")).toBeInTheDocument();
-    fireEvent.loadedData(container.querySelector("video")!);
-    expect(screen.queryByAltText("אוהד מנקין, EPR")).toBeNull();
-    expect(container.querySelector("video")).not.toHaveClass("hidden");
+    const clip = container.querySelector("video[data-role='clip']")!;
+    expect(clip).toHaveAttribute("src", `/clips/${clipped.id}.mp4`);
+    expect(clip).toHaveAttribute("poster", screenUrl(clipped.id));
   });
 
-  it("renders warning and tip callouts", () => {
-    const warned = allSteps.find((s) => s.warning)!;
+  it("renders tip callouts", () => {
+    // this training has tips only (no warnings)
+    expect(allSteps.some((s) => s.warning)).toBe(false);
     const tipped = allSteps.find((s) => s.tip)!;
-    setLast(warned.id);
-    const { unmount } = render(<App />);
-    expect(screen.getByRole("note")).toHaveTextContent(warned.warning!);
-    unmount();
     setLast(tipped.id);
     window.history.replaceState(null, "", "/"); // the address would otherwise reopen the previous step
     const { container } = render(<App />);

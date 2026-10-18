@@ -17,7 +17,7 @@ import HelpPanel from "./components/HelpPanel";
 import { moduleIntroUrl } from "./lib/media";
 import { isNarrationEnabled, setNarrationEnabled, stopSpeaking } from "./lib/speech";
 
-const AUTO_KEY = "muni-training-auto-v1";
+const AUTO_KEY = "eprconnect-training-auto-v1";
 const PLAYER_KEY = "epr-training-player-v1";
 const AUTO_DELAY_MS = 1500;
 

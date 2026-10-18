@@ -24,19 +24,17 @@ const PATHS: Record<string, string[]> = {
   mail: ["M4 4h16v16H4z", "M22 6l-10 7L2 6"],
   chat: ["M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"],
   expand: ["M15 3h6v6", "M9 21H3v-6", "M21 3l-7 7", "M3 21l7-7"],
+  download: ["M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", "M7 10l5 5 5-5", "M12 15V3"],
   zoom: ["M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z", "M21 21l-4.35-4.35", "M11 8v6", "M8 11h6"],
 };
 
 // Module id → icon (replaces the emoji in lessons.ts).
 export const MODULE_ICON: Record<string, string> = {
   "0": "hand",
-  "1": "lock",
-  "2": "home",
-  "3": "package",
-  "4": "invoice",
-  "5": "alert",
-  "6": "file",
-  "7": "wallet",
+  "1": "download",
+  "2": "package",
+  "3": "lock",
+  "4": "lightbulb",
 };
 
 export default function Icon({ name, className = "h-5 w-5", title }: { name: string; className?: string; title?: string }) {

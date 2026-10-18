@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { Module, Step } from "../content/types";
-import { screenUrl } from "../lib/media";
+import { clipUrl, screenUrl } from "../lib/media";
 import KaraokeText from "./KaraokeText";
 import { stepLabel } from "../content/label";
 import { sentenceRange } from "../lib/words";
@@ -176,6 +176,22 @@ export default function StepStage({ module, step, focusTitle = false, activeWord
                 }}
                 onError={() => setFailed(step.id)}
               />
+              {step.clip && (
+                // Same size as the poster screenshot, so zoom and ring coordinates still apply.
+                <video
+                  key={`clip-${step.id}`}
+                  data-role="clip"
+                  src={clipUrl(step.id)}
+                  poster={screenUrl(step.id)}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  aria-label={`${t("stepVideo")}: ${step.title}`}
+                  className="absolute inset-0 block h-full w-full"
+                />
+              )}
               <HighlightRing step={step} />
             </div>
             </div>

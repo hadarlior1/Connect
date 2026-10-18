@@ -2,6 +2,9 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import AvatarPanel from "../src/components/AvatarPanel";
 import * as narration from "../src/lib/narration";
 
+// This training ships without avatar videos; pretend step 1.3 has one to test the playback order.
+vi.mock("../src/content/videos", () => ({ STEP_VIDEOS: ["1.3"], MODULE_INTROS: [], EN_NARRATION: false }));
+
 const step = { id: "1.3", title: "קוד אימות", script: "עכשיו יישלח אליכם קוד אימות" };
 
 afterEach(() => vi.restoreAllMocks());
@@ -54,7 +57,7 @@ describe("AvatarPanel playback order", () => {
     });
     const { container } = render(<AvatarPanel step={step} narrate />);
     fireEvent.error(container.querySelector("video")!);
-    expect(screen.getByAltText("אוהד מנקין, EPR")).toHaveAttribute("data-speaking", "true");
+    expect(screen.getByAltText("המדריך הקולי, EPR")).toHaveAttribute("data-speaking", "true");
   });
 
   it("moves the mouth with the voice level", () => {

@@ -4,7 +4,13 @@
 // answers unknown paths with the SPA page, which some browsers never reject).
 import { readdirSync, statSync, writeFileSync } from "node:fs";
 
-const files = readdirSync(new URL("../public/avatar/", import.meta.url));
+// public/avatar may not exist at all (a voice-only training without avatar videos).
+let files = [];
+try {
+  files = readdirSync(new URL("../public/avatar/", import.meta.url));
+} catch {
+  /* no avatar videos */
+}
 const has = (ext) => new Set(files.filter((f) => f.endsWith(ext)).map((f) => f.slice(0, -ext.length)));
 const mp4 = has(".mp4");
 const webm = has(".webm");
