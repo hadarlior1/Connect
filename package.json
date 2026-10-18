@@ -13,7 +13,8 @@
     "deploy": "wrangler deploy",
     "screens": "python scripts/build-screens.py",
     "clips": "python scripts/build-clips.py",
-    "narration": "python scripts/build-narration.py"
+    "narration": "python scripts/build-narration.py",
+    "video": "python scripts/build-video.py"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
